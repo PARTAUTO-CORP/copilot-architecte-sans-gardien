@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Copilot Architecte - Guide d'installation et de présentation</title>
+<style>
+  @page { size: A4; margin: 17mm 16mm 17mm 16mm; }
+  :root { --ink:#1b2430; --soft:#566273; --line:#d9dfe7; --accent:#0f5e6b; --tint:#eef5f6; --warn:#8a3b12; --warntint:#fbf1ea; --code:#16202b; }
+  * { box-sizing:border-box; }
+  body { font-family:"Segoe UI",Arial,sans-serif; color:var(--ink); font-size:10.2pt; line-height:1.45; margin:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  h1 { font-size:25pt; line-height:1.15; margin:0 0 6px; color:var(--accent); font-weight:700; }
+  h2 { font-size:15pt; margin:0 0 8px; color:var(--accent); font-weight:700; break-after:avoid; }
+  h3 { font-size:11pt; margin:13px 0 4px; break-after:avoid; }
+  p { margin:0 0 7px; }
+  ul, ol { margin:0 0 8px; padding-left:18px; }
+  li { margin-bottom:3px; }
+  .lead { font-size:11.5pt; color:var(--soft); margin-bottom:14px; }
+  section { break-before:page; }
+  section.first { break-before:auto; }
+  table { width:100%; border-collapse:collapse; margin:5px 0 10px; font-size:9.3pt; }
+  thead { display:table-header-group; }
+  tr { break-inside:avoid; }
+  th { text-align:left; background:var(--tint); color:var(--accent); padding:4px 7px; border-bottom:1px solid var(--accent); font-weight:600; }
+  td { padding:4px 7px; border-bottom:1px solid var(--line); vertical-align:top; }
+  code { font-family:Consolas,"Courier New",monospace; font-size:.92em; background:#f1f3f5; padding:0 3px; border-radius:2px; }
+  td code { background:none; padding:0; }
+  pre { font-family:Consolas,"Courier New",monospace; background:var(--code); color:#eef2f6; padding:9px 11px; font-size:8.5pt; line-height:1.4; white-space:pre-wrap; margin:5px 0 9px; border-radius:3px; break-inside:avoid; }
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:7px 0 11px; }
+  .step { border:1px solid var(--line); border-top:3px solid var(--accent); padding:7px 9px; font-size:9.3pt; }
+  .step b { display:block; color:var(--accent); font-size:10.2pt; margin-bottom:2px; }
+  .warn { background:var(--warntint); border-left:3px solid var(--warn); padding:7px 11px; margin:8px 0 10px; break-inside:avoid; }
+  .warn b { color:var(--warn); }
+  .note { background:var(--tint); border-left:3px solid var(--accent); padding:7px 11px; margin:8px 0 10px; break-inside:avoid; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .small { font-size:8.6pt; color:var(--soft); }
+</style>
+</head>
+<body>
+
+<section class="first">
+  <h1>Copilot Architecte</h1>
+  <p class="lead">Une équipe de 12 agents spécialisés pour GitHub Copilot CLI, dont un expert du scraping et un pentester, qui travaille en autonomie sur votre PC. Cette version n'a pas de Gardien : aucune commande n'est contrôlée avant de s'exécuter.</p>
+
+  <h2>Installer en confiant le travail à une IA</h2>
+  <p>Vous n'avez pas besoin de lancer les commandes vous-même : une IA capable d'agir sur votre PC les exécute et vous guide.</p>
+  <div class="steps">
+    <div class="step"><b>1. Préparez</b>Lancez votre IA en mode sans restriction : <code>copilot --yolo</code>, <code>claude --dangerously-skip-permissions</code>, <code>codex --yolo</code>.</div>
+    <div class="step"><b>2. Vérifiez l'IA</b>Elle doit avoir accès à vos fichiers et à un terminal, sous Windows.</div>
+    <div class="step"><b>3. Collez le prompt</b>Copiez le texte ci-dessous. L'IA installe, vérifie, puis vous fait un rapport.</div>
+  </div>
+
+  <h3>Le prompt à coller</h3>
+  <pre>Installe Copilot Architecte sur ce PC, en toute autonomie et jusqu'au bout.
+Clone https://github.com/TON-COMPTE/copilot-architecte dans mon dossier personnel, ou télécharge son ZIP si Git est absent.
+Place-toi dans ce dossier, lis AGENTS.md et applique-le étape par étape.
+Si ta session demande des autorisations, demande-moi une seule fois de te relancer en mode sans restriction.
+Ne me demande jamais une clé dans la conversation.</pre>
+  <p class="small">Si le dossier est déjà sur votre PC, lancez l'IA depuis ce dossier et écrivez simplement : <code>Installe.</code> Sans IA : double-cliquez sur <code>installer.cmd</code>, ou suivez <code>INSTALL_MANUEL.md</code>.</p>
+
+  <div class="warn"><b>Lisez ceci avant d'accepter.</b> Une fois installé, Copilot agit avec tous les droits de votre compte Windows, sans rien vous demander. Il peut supprimer des fichiers, utiliser vos identifiants et envoyer des données sur le réseau. Installez le kit sur votre propre poste, ou sur celui d'une personne informée, et évitez une machine contenant des accès de production ou des données de tiers.</div>
+
+  <h3>Ce qui reste à votre charge</h3>
+  <ul>
+    <li><b>Avoir Copilot :</b> un abonnement GitHub Copilot et une session ouverte avec <code>copilot login</code>.</li>
+    <li><b>Taper vos clés de service :</b> dont la clé TypeSafe de JEV, dans votre terminal avec <code>.\mcp-scraping.ps1</code>, jamais dans la conversation avec l'IA.</li>
+    <li><b>Vous connecter aux services :</b> dans Copilot, ouvrez <code>/mcp</code> pour Firecrawl, TinyFish, Olostep et Apify.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Ce que l'IA installe</h2>
+  <p>Tout va dans <code>~/.copilot</code>, le dossier de Copilot dans votre profil Windows. Vos agents, skills et réglages sans rapport sont conservés, et chaque fichier modifié est d'abord sauvegardé.</p>
+  <table>
+    <thead><tr><th style="width:36%">Élément</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td>12 agents et 28 skills</td><td>L'équipe et ses méthodes de travail</td></tr>
+      <tr><td><code>copilot-instructions.md</code></td><td>Les règles communes à tous les agents ; vos propres instructions sont conservées</td></tr>
+      <tr><td><code>settings.json</code></td><td>Le réglage en pleine autonomie, fusionné avec vos réglages existants</td></tr>
+      <tr><td><code>mcp-config.json</code></td><td>Les serveurs de scraping et de décision</td></tr>
+      <tr><td>Moteur de scraping et Python</td><td>Environnement Python séparé, téléchargement d'environ 200 Mo</td></tr>
+      <tr><td>Navigateur Jev Ultrafast</td><td>Environnement Python séparé, version figée, profil Chrome dédié</td></tr>
+      <tr><td>Profil PowerShell</td><td>Les commandes <code>cop</code>, <code>copr</code> et <code>cop-pentest</code></td></tr>
+      <tr><td>Ligne d'état</td><td><code>statusline.ps1</code> : modèle, contexte, requêtes et durée en bas de la session</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:16px">Comment savoir que l'installation a réussi</h2>
+  <p>L'IA lance <code>.\verifier.ps1</code>. Chaque contrôle affiche OK ou KO et le dernier message doit être <code>RESULT: all checks OK</code>. Ensuite, deux essais confirment le fonctionnement réel. Ils consomment quelques crédits.</p>
+  <pre># 1. La délégation fonctionne : smoke.md doit montrer au moins deux sous-agents lancés
+copr "Ajoute une fonction utilitaire avec ses tests. Délègue l'implémentation au spécialiste concerné puis la revue à code-review, et cite les agents réellement appelés." --share smoke.md
+
+# 2. Le scraping fonctionne de bout en bout
+copr "Délègue à scraper : extrais le titre de https://example.com avec un outil MCP, range le résultat selon la skill data-organization et cite l'outil utilisé."</pre>
+
+  <h2 style="margin-top:16px">L'utiliser au quotidien</h2>
+  <table>
+    <thead><tr><th style="width:31%">Commande</th><th>Effet</th></tr></thead>
+    <tbody>
+      <tr><td><code>cop</code></td><td>Ouvre une session : l'Architect reçoit vos demandes et les confie aux bons spécialistes</td></tr>
+      <tr><td><code>cop -i "votre demande"</code></td><td>Pareil, en lançant directement la demande</td></tr>
+      <tr><td><code>copr "votre demande"</code></td><td>Travaille jusqu'au bout sans poser de question, puis s'arrête</td></tr>
+      <tr><td><code>copr "votre demande" --fleet</code></td><td>Pareil, avec des sous-agents en parallèle</td></tr>
+      <tr><td><code>cop-pentest</code></td><td>Session d'attaque et d'audit de vos propres applications</td></tr>
+      <tr><td><code>/usage</code> &nbsp; <code>/mcp</code> &nbsp; <code>/tasks</code></td><td>Dans une session : consommation, état des serveurs, sous-agents en cours</td></tr>
+    </tbody>
+  </table>
+  <p>Vous parlez normalement. Par exemple : <i>« Récupère tous les produits de ce catalogue avec prix et disponibilité, et donne-moi un fichier Excel. »</i></p>
+
+</section>
+
+<section>
+  <h2>Ce que fait le kit</h2>
+  <p>L'Architect comprend la demande, planifie, délègue à un seul responsable par domaine, contrôle les résultats et rend un rapport. Chaque agent doit distinguer ce qu'il a vérifié de ce qu'il suppose, et ne jamais présenter un test comme réussi s'il ne l'a pas lancé.</p>
+  <table>
+    <thead><tr><th style="width:22%">Agent</th><th>Domaine</th></tr></thead>
+    <tbody>
+      <tr><td><code>architect</code></td><td>Coordination, plan, consolidation et rapport final</td></tr>
+      <tr><td><code>scraper</code></td><td>Collecte de données web à toute échelle, rangement et contrôle des données</td></tr>
+      <tr><td><code>pentest</code></td><td>Attaque de vos applications, preuve des failles, nouveau test après correction</td></tr>
+      <tr><td><code>frontend</code> / <code>backend</code></td><td>Interfaces et intégration ; API et logique serveur, en Java comme dans toute autre pile</td></tr>
+      <tr><td><code>database</code></td><td>Schémas, SQL, migrations et performances</td></tr>
+      <tr><td><code>devops</code></td><td>CI/CD, Docker, environnements et déploiement</td></tr>
+      <tr><td><code>security</code></td><td>Menaces, vulnérabilités, secrets et dépendances</td></tr>
+      <tr><td><code>testing-strategy</code> / <code>qa-automation</code></td><td>Décider quoi tester ; écrire et exécuter les tests automatisés</td></tr>
+      <tr><td><code>code-review</code></td><td>Relecture indépendante du travail des autres agents</td></tr>
+      <tr><td><code>documentation</code></td><td>README, guides et documentation vérifiés sur le comportement réel</td></tr>
+    </tbody>
+  </table>
+  <p class="small"><b>28 skills</b> (méthodes chargées à la demande) : angular, api-testing, clean-code, confluence, crawlbase, data-organization, database, decision-support, docker, file-intelligence, firecrawl, github, gitlab-ci, java, jev-browser, jira, knowledge-management, nextjs, olostep, pentest, qa-automation, security, source-access, spring-boot, testing-strategy, tinyfish, ui-design, web-scraping.</p>
+
+  <h2 style="margin-top:16px">Ce qui est débridé</h2>
+  <p>Par défaut, Copilot demande souvent votre accord et s'arrête régulièrement. Avec le kit, il travaille seul jusqu'à la fin de la tâche.</p>
+  <table>
+    <thead><tr><th style="width:30%">Capacité</th><th>Effet</th></tr></thead>
+    <tbody>
+      <tr><td>Permissions totales</td><td>Tous les outils, tous les chemins et toutes les URL, sans confirmation</td></tr>
+      <tr><td>Mode interactif</td><td><code>cop</code> peut demander s'il faut changer le niveau d'effort. <code>copr</code> reste en autopilot, sans question</td></tr>
+      <tr><td>Puissance</td><td>Effort <code>high</code> avec un modèle fixé (le mode Auto choisit lui-même), fonctions expérimentales, mémoire entre les sessions</td></tr>
+      <tr><td>GitHub</td><td>Tous les outils du serveur GitHub, au lieu du sous-ensemble par défaut</td></tr>
+      <tr><td>Verrous retirés</td><td>Pas de bac à sable, pas d'interdiction dans vos réglages, scripts PowerShell autorisés</td></tr>
+      <tr><td>Second avis</td><td>Critique automatique par une autre famille de modèles aux moments importants</td></tr>
+      <tr><td>Continuité</td><td>Bascule sur un autre modèle en cas de limite de débit, PC maintenu éveillé pendant le travail</td></tr>
+    </tbody>
+  </table>
+  <p>Aucune limite n'est posée à l'autonomie. Aucun plafond de crédits n'est posé : suivez votre consommation avec <code>/usage</code>. Pour imposer un effort, relancez l'installation avec <code>-Model &lt;nom&gt; -Effort &lt;niveau&gt;</code>.</p>
+</section>
+
+<section>
+  <h2>L'agent Scraper</h2>
+  <p>Il mène la collecte de bout en bout : il cherche la voie la plus directe, teste sur quelques pages, lance le volume complet, contrôle les résultats et livre des données rangées. Il choisit toujours l'outil le moins coûteux qui fonctionne.</p>
+  <table>
+    <thead><tr><th style="width:27%">Situation</th><th>Outil choisi</th></tr></thead>
+    <tbody>
+      <tr><td>API, sitemap, JSON caché</td><td>Accès direct ou moteur local</td></tr>
+      <tr><td>Très grand volume, HTML simple</td><td>Moteur local : gratuit, reprend après un arrêt</td></tr>
+      <tr><td>Site en JavaScript</td><td>Firecrawl, Crawlbase</td></tr>
+      <tr><td>Clics, formulaires, parcours</td><td>Playwright, TinyFish</td></tr>
+      <tr><td>Grands lots sans infrastructure</td><td>Olostep, jusqu'à 100 000 URL par lot selon le compte</td></tr>
+      <tr><td>Site qui bloque les robots</td><td>Decodo, Oxylabs, ScrapingBee, Bright Data, Crawlbase</td></tr>
+      <tr><td>Google Maps, réseaux, marketplaces</td><td>Apify et ses scrapers prêts à l'emploi</td></tr>
+    </tbody>
+  </table>
+
+  <div class="two">
+    <div>
+      <h3>Serveurs MCP</h3>
+      <table>
+        <thead><tr><th>Accès</th><th>Serveurs</th></tr></thead>
+        <tbody>
+          <tr><td>Connexion dans <code>/mcp</code></td><td>Firecrawl, TinyFish, Olostep, Apify</td></tr>
+          <tr><td>Sans compte</td><td>Playwright, Jina (une partie des outils)</td></tr>
+          <tr><td>Votre clé</td><td>Crawlbase, Decodo, Oxylabs, ScrapingBee, Bright Data</td></tr>
+        </tbody>
+      </table>
+      <p class="small">Ces services demandent en général un compte et certains sont payants. Les clés sont stockées en clair dans <code>~/.copilot/mcp-config.json</code> : ne partagez pas ce fichier.</p>
+      <h3>Moteur local de gros volumes</h3>
+      <ul>
+        <li>File d'URL en base : reprise exacte après un arrêt</li>
+        <li>Limites par site et respect de <code>robots.txt</code></li>
+        <li>Nouvel essai automatique sur les erreurs temporaires</li>
+        <li>Contenu identique stocké une seule fois, compressé</li>
+        <li>Exports NDJSON, CSV et Parquet</li>
+      </ul>
+      <p class="small">Environ 100 pages/s mesurées sur 20 000 pages, contre un serveur local. Sur le vrai web, le débit dépend surtout des limites de chaque site.</p>
+    </div>
+    <div>
+      <h3>Rangement de chaque projet</h3>
+      <pre>scraping/2026-11-03_catalogue/
+├── README.md     méthode, couverture
+├── config/       URL, sélecteurs, schéma
+├── state.db      file d'URL et résultats
+├── raw/          pages brutes, intactes
+├── clean/        données validées
+├── rejects/      lignes refusées et raison
+├── exports/      Parquet, CSV, Excel
+├── scripts/      code du projet
+└── manifest.json paramètres, compteurs</pre>
+      <h3>Précision</h3>
+      <ul>
+        <li>Chaque ligne garde sa source et sa date</li>
+        <li>Une valeur manquante reste vide, jamais devinée</li>
+        <li>Une page de captcha n'est pas comptée comme un succès</li>
+        <li>La couverture réelle est annoncée en chiffres</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>Résultats variables selon les cibles.</b> Au test Proxyway d'octobre 2026 sur des cibles difficiles, Decodo atteint 87 %, Oxylabs 86 %, ScrapingBee 84 % et Firecrawl 34 % de réussite. Aucun outil n'obtient 100 %. L'agent teste donc sur votre cible avant de lancer un gros volume. Il reste aussi dans le cadre légal : données accessibles uniquement, pas de contournement d'identifiant ni de paywall, attention au RGPD pour les données personnelles.</div>
+</section>
+
+<section>
+  <h2>Décider vite et juste</h2>
+  <p>Quand un agent hésite, il ne vous interroge pas : il suit une méthode commune à tous les agents, tranche, puis note sa décision dans le rapport.</p>
+  <table>
+    <thead><tr><th style="width:40%">Situation</th><th style="width:34%">Outil</th><th>Coût</th></tr></thead>
+    <tbody>
+      <tr><td>Fait, calcul, date</td><td>Du code</td><td>Gratuit</td></tr>
+      <tr><td>Choix rapide entre plusieurs options</td><td>JEV, par appel direct à TypeSafe</td><td>0,042 $ par million de jetons en entrée</td></tr>
+      <tr><td>Décision lourde, échecs répétés</td><td>Rubber duck, critique intégré à Copilot</td><td>Crédits Copilot</td></tr>
+      <tr><td>Problème flou, autres outils indisponibles</td><td><code>sequential-thinking</code>, local</td><td>Gratuit</td></tr>
+      <tr><td>Objectif dans un navigateur</td><td>Jev Ultrafast, ou Playwright sans clé</td><td>Clé TypeSafe (et OpenRouter pour saisir du texte), ou gratuit</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>JEV conseille, l'agent décide.</b> Son éditeur le dit fort sur les décisions immédiates et faible sur les raisonnements complexes, les nombres et les dates. Les requêtes partent chez TypeSafe, aux États-Unis, dont la politique exclut l'entraînement sur vos requêtes mais ne donne pas de durée de conservation : les agents ne lui envoient ni secret, ni donnée personnelle, ni code privé. Il ne décide jamais du danger d'un script ni de la portée d'un pentest.</div>
+
+  <h2 style="margin-top:16px">Pentester vos applications</h2>
+  <p><code>cop-pentest</code> attaque vos applications, prouve chaque faille par l'exploitation, propose le correctif, rejoue l'attaque et écrit un rapport. La portée comprend les cibles que vous nommez, celles de <code>pentest-scope.txt</code> et les cibles locales.</p>
+  <div class="warn"><b>Ce qui reste hors du kit.</b> Le modèle peut refuser certaines demandes et les conditions de GitHub Copilot s'appliquent : aucun réglage ne lève cela. N'attaquez que ce dont vous avez la responsabilité, et préférez WSL, Docker ou une machine virtuelle, car les outils offensifs déclenchent souvent l'antivirus.</div>
+</section>
+
+<section>
+  <h2>Sans Gardien : ce qui n'est plus protégé</h2>
+  <div class="warn"><b>Rien ne contrôle les commandes de l'IA.</b> Une page piégée ou un dépôt hostile peut lui faire supprimer des fichiers, voler des mots de passe ou installer un programme. Seuls l'antivirus et les droits de votre compte Windows limitent les dégâts. Gardez la protection en temps réel de Windows activée, ainsi que des sauvegardes de vos données importantes.</div>
+  <p><code>cop</code> fait confiance au dossier courant sans le vérifier : inspectez un dépôt inconnu avant d'y lancer <code>cop</code>. Rien ne bloque non plus l'envoi d'un secret vers JEV.</p>
+
+  <h2 style="margin-top:14px">État des vérifications</h2>
+  <table>
+    <thead><tr><th style="width:15%">État</th><th>Élément</th></tr></thead>
+    <tbody>
+      <tr><td><b>Vérifié</b></td><td>Installation et relance, tests du moteur, du serveur Jev et du navigateur Jev, agent <code>scraper</code> chargé dans une vraie session Copilot</td></tr>
+      <tr><td><b>À confirmer</b></td><td>Délégation réelle entre agents, connexion aux serveurs MCP et appel réel de leurs outils, vrai appel à TypeSafe, rubber duck en autopilot, agent <code>pentest</code> en session : ces essais font partie des tests d'installation</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:14px">Revenir en arrière</h2>
+  <p>Chaque fichier modifié est d'abord sauvegardé dans <code>~/.copilot/backups/</code>. Demandez à l'IA : <i>« Applique la section Retour arrière du kit. »</i> Pour réduire les droits le temps d'une session, utilisez <code>/permissions</code>.</p>
+  <p class="small">Vérifié avec GitHub Copilot CLI 1.0.105 sous Windows 11, le 3 novembre 2026. Kit version 2.2 sans Gardien. Détails techniques : <code>docs/REFERENCE_TECHNIQUE.md</code>.</p>
+</section>
+
+</body>
+</html>

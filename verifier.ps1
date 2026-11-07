@@ -29,7 +29,8 @@ function Get-Frontmatter([string]$Path) {
 }
 
 function Test-SameFiles([string]$Kind) {
-    $files = Get-ChildItem (Join-Path $payload $Kind) -Recurse -File
+    # Python leaves __pycache__ when the tests run; install.ps1 does not copy it.
+    $files = Get-ChildItem (Join-Path $payload $Kind) -Recurse -File | Where-Object FullName -NotMatch '__pycache__'
     $bad = @($files | Where-Object {
             $t = Join-Path $CopilotHome ([IO.Path]::GetRelativePath($payload, $_.FullName))
             -not (Test-Path $t) -or (Get-FileHash $t).Hash -ne (Get-FileHash $_.FullName).Hash
@@ -57,7 +58,7 @@ $badAgents = @($agents | Where-Object {
 Check 'agent frontmatter: name, description, all tools' ($badAgents.Count -eq 0) ($badAgents -join ', ')
 
 $badSkills = @($skillNames | Where-Object {
-        $f = Get-Frontmatter (Join-Path $payload "skills\$_\SKILL.md")
+        $f = Get-Frontmatter (Join-Path $payload "skills/$_/SKILL.md")
         $f['name'] -ne $_ -or -not $f['description']
     })
 Check 'skill frontmatter: name matches folder, description' ($badSkills.Count -eq 0) ($badSkills -join ', ')
@@ -77,7 +78,7 @@ $orphans = @($skillNames | Where-Object { $_ -notin $usedSkills })
 Check 'every skill is used by an agent' ($orphans.Count -eq 0) ($orphans -join ', ')
 
 # The kit must stay neutral
-$personal = @(Get-ChildItem $payload -Recurse -File | Select-String -Pattern 'steev|cedri|cédric|C:\\Users' | ForEach-Object Filename | Select-Object -Unique)
+$personal = @(Get-ChildItem $payload -Recurse -File | Where-Object FullName -NotMatch '__pycache__' | Select-String -Pattern 'steev|cedri|cédric|C:\\Users' | ForEach-Object Filename | Select-Object -Unique)
 Check 'no personal name or path in the kit' ($personal.Count -eq 0) ($personal -join ', ')
 
 # Global instructions
@@ -110,7 +111,7 @@ Check 'cop, copr and cop-pentest launchers in the profile' $hasLaunchers
 Check 'cop can ask the user' ($hasLaunchers -and -not (Select-String -Path $ProfilePath -Pattern 'function cop .*--no-ask-user' -Quiet))
 
 # An earlier install's hook would keep refusing commands.
-Check 'no Gardien left from an earlier install' (-not (Test-Path (Join-Path $CopilotHome 'hooks\architecte-gardien.json')) -and -not (Test-Path (Join-Path $CopilotHome 'gardien\garde.ps1')))
+Check 'no Gardien left from an earlier install' (-not (Test-Path (Join-Path $CopilotHome 'hooks/architecte-gardien.json')) -and -not (Test-Path (Join-Path $CopilotHome 'gardien/garde.ps1')))
 
 # MCP servers: only presence is checked here, /mcp in Copilot shows sign-in and tools
 $mcp = $null
@@ -120,17 +121,18 @@ Check 'scraping and decision MCP servers registered' (@($missing).Count -eq 0) (
 if ($mcp -and $mcp['mcpServers']) { Write-Host "     registered: $($mcp['mcpServers'].Keys -join ', ')" }
 
 # Scraping engine
-$venvPython = Join-Path $CopilotHome 'scraper\venv\Scripts\python.exe'
+$venvRelative = if ($IsWindows) { 'venv/Scripts/python.exe' } else { 'venv/bin/python' }
+$venvPython = Join-Path $CopilotHome 'scraper' $venvRelative
 $engineOk = (Test-Path $venvPython) -and ((& $venvPython -c 'import httpx, selectolax.lexbor, pyarrow.parquet; print(1)' 2>$null) -eq '1')
 Check 'scraping engine: Python environment ready' $engineOk $(if (-not $engineOk) { 'Python packages missing, rerun install.ps1' })
 
 # Jev browser: find_spec, because importing browser-harness would start its setup
-$decisionPython = Join-Path $CopilotHome 'decision\venv\Scripts\python.exe'
+$decisionPython = Join-Path $CopilotHome 'decision' $venvRelative
 $jevOk = (Test-Path $decisionPython) -and ((& $decisionPython -c "import importlib.util as u; print(all(u.find_spec(m) for m in ('jev_ultrafast', 'browser_harness')))" 2>$null) -eq 'True')
 Check 'Jev browser: Python environment ready' $jevOk $(if (-not $jevOk) { 'Python packages missing, rerun install.ps1' })
-$jevTools = if ($jevOk) { '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | & $decisionPython (Join-Path $CopilotHome 'decision\jev_mcp.py') 2>$null }
+$jevTools = if ($jevOk) { '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | & $decisionPython (Join-Path $CopilotHome 'decision/jev_mcp.py') 2>$null }
 Check 'Jev server answers and offers run_decision' ([string]$jevTools -match 'run_decision')
-if (-not (Test-Path (Join-Path $CopilotHome 'decision\.env'))) { Write-Host '[!!] No TypeSafe key yet (.\mcp-scraping.ps1): agents skip Jev and use the rubber duck and playwright' }
+if (-not (Test-Path (Join-Path $CopilotHome 'decision/.env'))) { Write-Host '[!!] No TypeSafe key yet (./mcp-scraping.ps1): agents skip Jev and use the rubber duck and playwright' }
 
 # Environment: permanent "true" would trust any folder
 if (-not $SkipUserEnv) {
@@ -141,6 +143,12 @@ if (-not $SkipUserEnv) {
 try {
     if (-not (Get-MpComputerStatus).RealTimeProtectionEnabled) { Write-Host '[!!] Windows Defender real-time protection is OFF: check that another antivirus is active' }
 } catch { }
+
+# Information, not a failure: the free MCP servers and the local engine work without a browser
+if ($IsLinux) {
+    if (-not (Test-Path '/opt/google/chrome/chrome')) { Write-Host '[!!] Google Chrome missing: the playwright MCP server and the Jev browser cannot open pages (bash installer.sh as root installs it)' }
+    if ((id -u) -eq '0') { Write-Host '[!!] Installed for root: the Jev browser cannot start Chrome as root, a dedicated user is safer' }
+}
 
 Write-Host "`nAgent -> skills matrix:"
 $matrix | Format-Table -AutoSize | Out-String -Width 160 | Write-Host

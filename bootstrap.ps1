@@ -46,7 +46,8 @@ function Confirm-Tool([string]$Name, [string]$Command, [string]$Argument, [versi
     Write-Host "[OK] $Name $version"
 }
 
-try {
+# On Linux, installer.sh has already installed the prerequisites. $IsLinux does not exist in 5.1, so it is false there.
+if (-not $IsLinux) { try {
     # A ZIP downloaded from GitHub marks every file as coming from the internet, and the launchers would then refuse to run.
     Get-ChildItem $PSScriptRoot -Recurse -File | Unblock-File
 
@@ -66,7 +67,7 @@ try {
 } catch {
     Write-Host "[KO] $($_.Exception.Message)" -ForegroundColor Red
     exit 1
-}
+} }
 
 $common = @()
 if ($CopilotHome) { $common += '-CopilotHome', $CopilotHome }

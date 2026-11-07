@@ -15,12 +15,14 @@ param(
     [string]$Effort = 'high',
     [string]$Model = '',
     [switch]$SkipUserEnv,  # used by tests: leaves the persistent user environment untouched
-    [string]$VsCodeMcp = $(if ($SkipUserEnv) { '' } else { Join-Path $env:APPDATA 'Code\User\mcp.json' }),
+    [string]$VsCodeMcp = $(if ($SkipUserEnv) { '' } else { Join-Path ([Environment]::GetFolderPath('ApplicationData')) 'Code/User/mcp.json' }),  # %APPDATA% on Windows, ~/.config on Linux
     [switch]$SkipScraperDeps,  # skips the Python environment of the scraper (download of about 200 MB)
     [switch]$NoPrompt,  # no question about MCP keys; run .\mcp-scraping.ps1 later to add them
     [switch]$Reset  # reinitialize kit-owned files and remove obsolete files recorded in the kit manifest
 )
 $ErrorActionPreference = 'Stop'
+# Relative paths use '/': Join-Path turns it into '\' on Windows.
+$venvPython = if ($IsWindows) { 'venv/Scripts/python.exe' } else { 'venv/bin/python' }
 
 $payload = Join-Path $PSScriptRoot 'payload'
 if (-not (Test-Path $payload)) { throw "Missing payload folder: $payload" }
@@ -50,7 +52,7 @@ $settings = if (Test-Path $settingsPath) {
 }
 if ($null -eq $settings) { $settings = [ordered]@{} }
 
-$backupDir = Join-Path $CopilotHome ("backups\architecte-" + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+$backupDir = Join-Path $CopilotHome ("backups/architecte-" + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 
 function Backup-Item([string]$Path, [string]$Name) {
     if (-not (Test-Path $Path)) { return }
@@ -92,7 +94,8 @@ if (Test-Path $manifestPath) {
     }
     $oldManagedFiles = @($manifest['managedFiles'] | ForEach-Object { [string]$_ })
 }
-$copilotRoot = [IO.Path]::GetFullPath($CopilotHome).TrimEnd('\') + '\'
+$sep = [IO.Path]::DirectorySeparatorChar
+$copilotRoot = [IO.Path]::GetFullPath($CopilotHome).TrimEnd($sep) + $sep
 foreach ($relative in $oldManagedFiles) {
     if ([IO.Path]::IsPathRooted($relative) -or $relative -match '(^|[\\/])\.\.([\\/]|$)') {
         throw "Unsafe path in Copilot Architecte ownership manifest: $relative"
@@ -258,14 +261,14 @@ $null = $json | ConvertFrom-Json  # never write invalid JSON: Copilot could fail
 Set-Content -LiteralPath $settingsPath -Value $json
 
 # 4. Removes the Gardien of an earlier install, backed up first: its hook would keep refusing commands.
-foreach ($relative in 'hooks\architecte-gardien.json', 'gardien\garde.ps1', 'gardien\journal.jsonl', 'skills\script-guard\SKILL.md') {
+foreach ($relative in 'hooks/architecte-gardien.json', 'gardien/garde.ps1', 'gardien/journal.jsonl', 'skills/script-guard/SKILL.md') {
     $old = Join-Path $CopilotHome $relative
     if (Test-Path -LiteralPath $old) {
         Backup-Item $old $relative
         Remove-Item -LiteralPath $old -Force
     }
 }
-foreach ($folder in 'gardien', 'skills\script-guard') {
+foreach ($folder in 'gardien', 'skills/script-guard') {
     $old = Join-Path $CopilotHome $folder
     if ((Test-Path -LiteralPath $old) -and -not (Get-ChildItem -LiteralPath $old -Force)) { Remove-Item -LiteralPath $old -Force }
 }
@@ -302,7 +305,7 @@ if ($VsCodeMcp -and (Test-Path (Split-Path $VsCodeMcp))) {
         $vs = if (Test-Path $VsCodeMcp) { Get-Content $VsCodeMcp -Raw | ConvertFrom-Json -AsHashtable }
         if ($null -eq $vs) { $vs = [ordered]@{} }
         if ($vs['servers'] -isnot [System.Collections.IDictionary]) { $vs['servers'] = [ordered]@{} }
-        $vs['servers']['jev'] = [ordered]@{ type = 'stdio'; command = (Join-Path $CopilotHome 'decision\venv\Scripts\python.exe'); args = @((Join-Path $CopilotHome 'decision\jev_mcp.py')) }
+        $vs['servers']['jev'] = [ordered]@{ type = 'stdio'; command = (Join-Path $CopilotHome 'decision' $venvPython); args = @((Join-Path $CopilotHome 'decision/jev_mcp.py')) }
         Backup-Item $VsCodeMcp 'vscode-mcp.json'
         $vs | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath $VsCodeMcp
     } catch { Write-Warning "VS Code MCP file left unchanged, it could not be read: $VsCodeMcp" }
@@ -310,12 +313,13 @@ if ($VsCodeMcp -and (Test-Path (Split-Path $VsCodeMcp))) {
 
 # 7. Python environments: scraping engine and browser decisions, kept apart so one failure leaves the other working
 if (-not $SkipScraperDeps) {
-    $python = Get-Command python -ErrorAction SilentlyContinue
+    $python = Get-Command $(if ($IsWindows) { 'python' } else { 'python3' }) -ErrorAction SilentlyContinue
     if ($python) {
+        # The real file, not a symlink such as ~/.local/bin/python3: a venv built from a symlink cannot find its standard library.
+        $pythonExe = & $python.Source -c 'import os, sys; print(os.path.realpath(sys.executable))'
         foreach ($part in 'scraper', 'decision') {
-            $venv = Join-Path $CopilotHome "$part\venv"
-            & $python.Source -m venv $venv
-            & (Join-Path $venv 'Scripts\python.exe') -m pip install --quiet -r (Join-Path $CopilotHome "$part\requirements.txt")
+            & $pythonExe -m venv (Join-Path $CopilotHome "$part/venv")
+            & (Join-Path $CopilotHome $part $venvPython) -m pip install --quiet -r (Join-Path $CopilotHome "$part/requirements.txt")
             if ($LASTEXITCODE -ne 0) { Write-Warning "Python packages of '$part' failed to install. Everything else is in place." }
         }
     } else {
@@ -334,4 +338,4 @@ Write-Host "Installation mode: $(if ($Reset) { 'reinitialized kit files' } else 
 Write-Host "Installed in: $CopilotHome"
 Write-Host "Profile: $ProfilePath"
 Write-Host "Backups (if anything changed): $backupDir"
-Write-Host "Open a new terminal, then run .\verifier.ps1 and start Copilot with: cop"
+Write-Host "Open a new PowerShell 7 terminal (pwsh), then run ./verifier.ps1 and start Copilot with: cop"

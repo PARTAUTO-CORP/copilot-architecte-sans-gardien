@@ -13,7 +13,8 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 
-if (-not $NoPrompt -and -not $PromptWindow) {
+# Linux has no new console window to open (SSH, no desktop): the prompts stay in this terminal.
+if (-not $NoPrompt -and -not $PromptWindow -and $IsWindows) {
     $pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
     if (-not $pwsh) { throw 'PowerShell 7 is required for guided setup. Run installer.cmd to install it, then retry.' }
 
@@ -32,7 +33,9 @@ if (-not $NoPrompt -and -not $PromptWindow) {
     return
 }
 
-$decisionEnv = Join-Path $CopilotHome 'decision\.env'
+$decisionEnv = Join-Path $CopilotHome 'decision/.env'
+# Keys are stored in clear text in this folder: on a shared Linux server, only this account may read it.
+if (-not $IsWindows) { New-Item -ItemType Directory -Force $CopilotHome | Out-Null; chmod 700 $CopilotHome }
 if ($PromptWindow) {
     $Host.UI.RawUI.WindowTitle = 'Copilot Architecte - Configuration guidee'
     Write-Host ''
@@ -63,8 +66,8 @@ Set-Http 'jina' 'https://mcp.jina.ai/v1'
 if (-not $servers.Contains('olostep')) { Set-Http 'olostep' 'https://mcp.olostep.com/mcp' }
 $servers['jev'] = [ordered]@{
     type    = 'local'
-    command = (Join-Path $CopilotHome 'decision\venv\Scripts\python.exe')
-    args    = @((Join-Path $CopilotHome 'decision\jev_mcp.py'))  # direct to TypeSafe, key in decision\.env
+    command = (Join-Path $CopilotHome $(if ($IsWindows) { 'decision/venv/Scripts/python.exe' } else { 'decision/venv/bin/python' }))
+    args    = @((Join-Path $CopilotHome 'decision/jev_mcp.py'))  # direct to TypeSafe, key in decision\.env
     env     = @{}
     tools   = @('*')
 }
@@ -105,6 +108,8 @@ if (-not $NoPrompt) {
         Write-Host 'A browser window will open to TypeSafe. Sign in or create an account, then create/copy your API key.'
         Write-Host 'Return here and paste the key at the hidden prompt. The key is saved locally, never displayed.'
         try {
+            # Over SSH there is no desktop, and xdg-open could start a text browser inside this terminal.
+            if (-not ($IsWindows -or $env:DISPLAY -or $env:WAYLAND_DISPLAY)) { throw 'no graphical display' }
             Start-Process $typesafeUrl -ErrorAction Stop
         } catch {
             Write-Warning "Could not open the TypeSafe page automatically. Open this URL yourself: $typesafeUrl"
@@ -120,7 +125,7 @@ if (-not $NoPrompt) {
 
 New-Item -ItemType Directory -Force $CopilotHome | Out-Null
 if (Test-Path $configPath) {
-    $backup = Join-Path $CopilotHome ("backups\mcp-config-" + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.json')
+    $backup = Join-Path $CopilotHome ("backups/mcp-config-" + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.json')
     New-Item -ItemType Directory -Force (Split-Path $backup) | Out-Null
     Copy-Item -LiteralPath $configPath -Destination $backup
 }
@@ -139,7 +144,7 @@ Write-Host '  Paste a key only when prompted; press Enter to skip a provider.'
 Write-Host ''
 Write-Host 'STEP 3 - TypeSafe and OpenRouter (Jev browser)' -ForegroundColor Cyan
 Write-Host '  For the Jev browser / decision stack, you can set the key now or skip it and use the rubber duck / Playwright fallback.'
-Write-Host "  Keys go into: $(Join-Path $CopilotHome 'decision\.env')"
+Write-Host "  Keys go into: $decisionEnv"
 Write-Host ''
 Write-Host "MCP servers registered: $($servers.Keys -join ', ')"
 Write-Host 'Next action: open /mcp in Copilot, then run /env and /agents to confirm all tools are visible.'

@@ -1,6 +1,6 @@
 # Installation manuelle, de A à Z
 
-Ce guide fait à la main tout ce que fait `installer.cmd`. Chaque étape dit quoi faire, pourquoi, et comment vérifier. Tu peux aussi copier-coller n'importe quelle étape à une IA : les blocs se suffisent à eux-mêmes.
+Ce guide fait à la main tout ce que fait `installer.cmd`. Il est écrit pour Windows ; sous Linux, utilise `bash installer.sh` (voir le [README](README.md#installer-sous-linux)) et remplace `venv\Scripts\python.exe` par `venv/bin/python` dans les commandes. Chaque étape dit quoi faire, pourquoi, et comment vérifier. Tu peux aussi copier-coller n'importe quelle étape à une IA : les blocs se suffisent à eux-mêmes.
 
 **Le plus simple reste la voie assistée** (partie A). La partie B détaille chaque fichier, si tu veux tout contrôler. La partie C adapte le kit à une autre IA que Copilot.
 
@@ -18,7 +18,9 @@ Ce guide fait à la main tout ce que fait `installer.cmd`. Chaque étape dit quo
 | `~/.copilot/statusline.ps1` | Ajoute la ligne d'état : modèle, dossier, branche, contexte, requêtes, durée |
 | `~/.copilot/architecte-manifest.json` | Liste les fichiers du kit, pour pouvoir retirer ceux devenus obsolètes |
 | Profil PowerShell (`$PROFILE.CurrentUserAllHosts`) | Ajoute `cop`, `copr` et `cop-pentest` dans un bloc repéré |
-| `%APPDATA%\Code\User\mcp.json` | Ajoute `jev`, seulement si VS Code est présent |
+| `%APPDATA%\Code\User\mcp.json` (Linux : `~/.config/Code/User/mcp.json`) | Ajoute `jev`, seulement si VS Code est présent |
+| Linux seulement : `~/.local/bin`, `~/.local/opt` | PowerShell 7, Node 24, Copilot CLI et au besoin un Python 3.12 autonome (uv) s'ils manquaient, et une ligne `PATH` dans `~/.profile`, ainsi que `~/.bashrc` et `~/.zshrc` s'ils existent |
+| Linux seulement, avec root ou `sudo` | Google Chrome, la bibliothèque ICU et le module `venv` de Python, par le gestionnaire de paquets |
 
 L'installation retire aussi le Gardien d'une version précédente et la variable utilisateur permanente `COPILOT_ALLOW_ALL`. Tes fichiers modifiés sont d'abord copiés dans `~/.copilot/backups/`, sauf `statusline.ps1`, réécrit à chaque installation.
 

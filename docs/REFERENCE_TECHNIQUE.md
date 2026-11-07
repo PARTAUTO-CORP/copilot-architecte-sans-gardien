@@ -18,6 +18,7 @@ Ce document est la référence technique. Pour installer : `README.md` et `INSTA
 | `payload/scraper/` | Le moteur de scraping en masse et ses dépendances Python |
 | `payload/decision/` | Le serveur MCP de décision vers TypeSafe et le navigateur Jev Ultrafast, à version figée |
 | `installer.cmd`, `bootstrap.ps1` | Installent les prérequis manquants, lancent `install.ps1`, puis `verifier.ps1` |
+| `installer.sh` | L'équivalent Linux de `installer.cmd`. Partie système (root ou `sudo`) : Google Chrome, ICU, module `venv`. Partie compte : PowerShell 7, Node 24, Copilot CLI et au besoin un Python 3.12 autonome (uv) dans `~/.local`, puis `bootstrap.ps1`. `-SystemOnly` ne fait que la partie système |
 | `AGENTS.md` | La procédure suivie par une IA qui installe le kit |
 | `install.ps1` | Installe le tout et débride Copilot |
 | `mcp-scraping.ps1` | Déclare les serveurs MCP de scraping et de décision, et demande les clés |
@@ -35,6 +36,8 @@ Ce document est la référence technique. Pour installer : `README.md` et `INSTA
 # ouvrir un nouveau terminal PowerShell 7
 cop
 ```
+
+Sous Linux, `bash installer.sh`, puis `pwsh` dans un nouveau terminal, puis `cop`. Les scripts PowerShell sont les mêmes ; seules différences : les environnements Python sont dans `venv/bin/python` au lieu de `venv\Scripts\python.exe`, le profil est `~/.config/powershell/profile.ps1`, le fichier MCP de VS Code `~/.config/Code/User/mcp.json`, les clés se tapent dans le même terminal au lieu d'une fenêtre séparée, la page TypeSafe ne s'ouvre que s'il y a un bureau graphique (`DISPLAY` ou `WAYLAND_DISPLAY`), et `~/.copilot` est réservé à son propriétaire (`chmod 700`) car il contient les clés en clair. Les contrôles Windows Defender sont ignorés ; `verifier.ps1` signale à la place l'absence de Chrome et une installation pour root. Pour un VPS, voir « Installer sur un VPS » dans le README.
 
 L'installation demande d'abord le mode : mise à jour, ou réinitialisation. Elle ouvre ensuite une fenêtre PowerShell 7 pour les clés des services : colle-les dans les champs masqués ou appuie sur Entrée pour passer. Tu pourras les ajouter plus tard avec `.\mcp-scraping.ps1`. Ne donne jamais une clé à une IA dans une conversation.
 

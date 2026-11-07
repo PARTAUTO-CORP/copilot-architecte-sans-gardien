@@ -40,7 +40,8 @@ def find_chrome():
         candidate = Path(root) / "Google/Chrome/Application/chrome.exe"
         if candidate.exists():
             return str(candidate)
-    return shutil.which("chrome") or shutil.which("google-chrome") or shutil.which("chromium")
+    names = ("chrome", "google-chrome", "google-chrome-stable", "chromium", "chromium-browser")
+    return next(filter(None, map(shutil.which, names)), None)
 
 
 def start_chrome(show):

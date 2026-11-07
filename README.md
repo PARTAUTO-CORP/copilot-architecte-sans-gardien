@@ -1,6 +1,6 @@
 # Copilot Architecte (sans Gardien)
 
-Une équipe de 12 agents pour GitHub Copilot CLI, sous Windows. Elle travaille en autonomie, ne pose de question que pour proposer un autre niveau d'effort, décide avec JEV et un second modèle, scrape à grande échelle, et pentest tes propres applications. Cette version n'a pas de Gardien : aucune commande n'est contrôlée avant de s'exécuter.
+Une équipe de 12 agents pour GitHub Copilot CLI, sous Windows ou Linux. Elle travaille en autonomie, ne pose de question que pour proposer un autre niveau d'effort, décide avec JEV et un second modèle, scrape à grande échelle, et pentest tes propres applications. Cette version n'a pas de Gardien : aucune commande n'est contrôlée avant de s'exécuter.
 
 | Ce que tu cherches | Où aller |
 |---|---|
@@ -65,9 +65,44 @@ Double-clique sur `installer.cmd`. Il installe ce qui manque, te demande de choi
 
 Pour installer sans IA ni double-clic, étape par étape, suis [INSTALL_MANUEL.md](INSTALL_MANUEL.md).
 
+## Installer sous Linux
+
+Dans un terminal, depuis le dossier du kit :
+
+```bash
+bash installer.sh
+```
+
+Il travaille en deux parties :
+
+1. **Système, avec `sudo` :** Google Chrome (pour le serveur `playwright` et le navigateur Jev), le module `venv` de Python et la bibliothèque ICU dont PowerShell a besoin. `sudo` te demande ton mot de passe. Distributions prises en charge : celles qui utilisent apt, dnf, zypper ou pacman. Chrome n'est installé qu'avec apt ou dnf, sur processeur x64.
+2. **Ton compte, sans `sudo` :** PowerShell 7, Node 24 et Copilot CLI dans `~/.local`, et un Python 3.12 autonome (uv) si celui de la distribution est plus ancien (Ubuntu 22.04, Debian 12). `~/.local/bin` est ajouté au `PATH`.
+
+Il pose ensuite les mêmes questions que sous Windows, dans le même terminal, puis lance le contrôle. Les options sont les mêmes que pour `installer.cmd` (`-NoPrompt`, `-Reset`, `-Model`…). Sans `sudo`, la partie système est sautée avec un avertissement : le reste fonctionne, sauf les outils qui ouvrent un navigateur.
+
+### Installer sur un VPS
+
+Pour un serveur de scraping, avec ou sans bureau graphique (xrdp, VNC). N'utilise pas root pour le kit : Copilot aurait la main sur tout le serveur, et Chrome refuse de démarrer en root, ce qui bloque le navigateur Jev. Crée un utilisateur dédié :
+
+```bash
+# En root, depuis le dossier du kit
+bash installer.sh -SystemOnly        # Chrome, Python, ICU : la partie système seule
+useradd -m -s /bin/bash copilot && passwd copilot   # le mot de passe sert au bureau graphique
+# SSH : les mêmes clés que root, car les VPS refusent souvent la connexion SSH par mot de passe
+install -d -m 700 -o copilot -g copilot /home/copilot/.ssh && install -m 600 -o copilot -g copilot /root/.ssh/authorized_keys /home/copilot/.ssh/
+cp -r "$PWD" /home/copilot/ && chown -R copilot: /home/copilot/"$(basename "$PWD")"
+```
+
+Ouvre ensuite une session en tant que `copilot` (bureau graphique, `ssh copilot@<serveur>`, ou `su - copilot` depuis root), va dans le dossier copié et lance `bash installer.sh`.
+
+- **Bureau graphique :** la page TypeSafe s'ouvre dans le navigateur du bureau, et `--show` affiche le navigateur Jev sur ce bureau.
+- **Sans bureau (SSH) :** tout fonctionne sans fenêtre ; copie l'adresse TypeSafe affichée dans le navigateur de ton PC. `copilot login` donne un code à saisir sur github.com/login/device depuis n'importe quel appareil.
+- **Sécurité :** `cop` agit sans confirmation sur une machine ouverte sur Internet. N'y mets ni accès de production ni données de tiers, n'ouvre que les ports nécessaires (SSH, bureau à distance), et ne donne pas de `sudo` sans mot de passe au compte `copilot`. Les clés de service sont stockées en clair dans `~/.copilot`, que l'installation réserve à ce compte (`chmod 700`).
+- **Ressources :** prévois au moins 2 Go de RAM : Chrome, Node et Copilot tournent ensemble pendant un scraping.
+
 ## Ensuite
 
-Ouvre un nouveau terminal PowerShell 7 :
+Ouvre un nouveau terminal PowerShell 7 (sous Linux : un terminal, puis `pwsh`) :
 
 | Commande | Effet |
 |---|---|
@@ -75,24 +110,24 @@ Ouvre un nouveau terminal PowerShell 7 :
 | `copr "ta demande"` | Travaille jusqu'au bout sans interface, puis s'arrête |
 | `cop-pentest` | Session pour attaquer et auditer tes propres applications |
 
-Ajoute tes clés de service quand tu veux avec `.\mcp-scraping.ps1`. Sans elles, les agents utilisent les outils gratuits.
+Ajoute tes clés de service quand tu veux avec `./mcp-scraping.ps1`. Sans elles, les agents utilisent les outils gratuits.
 
 ## À lire avant d'installer
 
-**`cop` donne à Copilot tous les droits de ton compte Windows, sans rien te demander.** Il peut supprimer des fichiers, utiliser tes identifiants et envoyer des données sur le réseau. Aucun Gardien ne contrôle ses commandes : une page piégée ou un dépôt hostile peut lui faire exécuter n'importe quoi. Installe le kit sur ton propre poste, garde des sauvegardes et la protection en temps réel de Windows, et évite une machine avec des accès de production ou des données de tiers.
+**`cop` donne à Copilot tous les droits de ton compte Windows ou Linux, sans rien te demander.** Il peut supprimer des fichiers, utiliser tes identifiants et envoyer des données sur le réseau. Aucun Gardien ne contrôle ses commandes : une page piégée ou un dépôt hostile peut lui faire exécuter n'importe quoi. Installe le kit sur ton propre poste, garde des sauvegardes et la protection en temps réel de Windows, et évite une machine avec des accès de production ou des données de tiers.
 
 Les services externes (TypeSafe, Firecrawl, etc.) et les crédits Copilot sont payants selon leur usage : aucun plafond n'est posé. N'attaque que les applications dont tu as la responsabilité.
 
 ## Prérequis
 
-- Windows 10 ou 11.
+- Windows 10 ou 11, ou Linux x64 ou arm64.
 - Un abonnement GitHub Copilot.
-- Tout le reste s'installe seul : PowerShell 7.3+, Python 3.12+, Node 24+ et Copilot CLI. Il faut `winget` si l'un des trois premiers manque.
-- Facultatif : Git pour cloner le dépôt, Google Chrome pour le navigateur Jev.
+- Tout le reste s'installe seul : PowerShell 7.3+, Python 3.12+, Node 24+ et Copilot CLI. Sous Windows, il faut `winget` si l'un des trois premiers manque ; sous Linux, `sudo` (ou root) pour Chrome et les bibliothèques système.
+- Facultatif : Git pour cloner le dépôt, Google Chrome ou Chromium pour le navigateur Jev.
 
 ## Mettre à jour
 
-Récupère la nouvelle version du dossier, puis relance `installer.cmd`. Tes réglages et tes fichiers personnels restent en place.
+Récupère la nouvelle version du dossier, puis relance `installer.cmd` (Windows) ou `bash installer.sh` (Linux). Tes réglages et tes fichiers personnels restent en place.
 
 ## Désinstaller
 

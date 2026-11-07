@@ -9,6 +9,12 @@ description: Agent navigateur ultra-rapide Jev Ultrafast, où chaque clic est un
 & "$HOME\.copilot\decision\venv\Scripts\python.exe" "$HOME\.copilot\decision\jev_browser.py" --url <url> --goal "<objectif précis>"
 ```
 
+Sous Linux :
+
+```bash
+~/.copilot/decision/venv/bin/python ~/.copilot/decision/jev_browser.py --url <url> --goal "<objectif précis>"
+```
+
 Le résultat est une ligne JSON : `status`, `url`, `title`, `elapsed_ms`, `actions`, `input_tokens`, `error`. Code de sortie : 0 terminé, 1 bloqué ou erreur, 2 clés manquantes.
 
 | Option | Effet |
